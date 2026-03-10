@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero_main",
+      "description": "A vibrant spread of Indian dishes on a rustic table.",
+      "imageUrl": "https://picsum.photos/seed/hero/1920/1080",
+      "imageHint": "indian food"
+    },
+    {
+      "id": "about_us_image",
+      "description": "The interior of a warm and inviting restaurant.",
+      "imageUrl": "https://picsum.photos/seed/about/800/600",
+      "imageHint": "restaurant interior"
+    },
+    {
+      "id": "sig_mutton_handi",
+      "description": "A close-up of a traditional mutton handi dish.",
+      "imageUrl": "https://picsum.photos/seed/sig1/600/400",
+      "imageHint": "mutton curry"
+    },
+    {
+      "id": "sig_litti_chokha",
+      "description": "Freshly made litti chokha on a platter.",
+      "imageUrl": "https://picsum.photos/seed/sig2/600/400",
+      "imageHint": "indian food"
+    },
+    {
+      "id": "sig_tandoori_chicken",
+      "description": "Juicy tandoori chicken pieces with lemon and onions.",
+      "imageUrl": "https://picsum.photos/seed/sig3/600/400",
+      "imageHint": "tandoori chicken"
+    },
+    {
+      "id": "veg_paneer_butter_masala",
+      "description": "A bowl of creamy paneer butter masala.",
+      "imageUrl": "https://picsum.photos/seed/menu1/600/400",
+      "imageHint": "paneer curry"
+    },
+    {
+      "id": "veg_dal_makhani",
+      "description": "Rich and dark dal makhani in a serving bowl.",
+      "imageUrl": "https://picsum.photos/seed/menu2/600/400",
+      "imageHint": "dal makhani"
+    },
+    {
+      "id": "veg_sattu_paratha",
+      "description": "A stack of sattu parathas with a side of pickle.",
+      "imageUrl": "https://picsum.photos/seed/menu3/600/400",
+      "imageHint": "indian bread"
+    },
+    {
+      "id": "nonveg_chicken_biryani",
+      "description": "A flavorful chicken biryani in a handi.",
+      "imageUrl": "https://picsum.photos/seed/menu4/600/400",
+      "imageHint": "chicken biryani"
+    },
+    {
+      "id": "nonveg_fish_curry",
+      "description": "A spicy Bihari-style fish curry in a bowl.",
+      "imageUrl": "https://picsum.photos/seed/menu5/600/400",
+      "imageHint": "fish curry"
+    },
+    {
+      "id": "nonveg_mutton_korma",
+      "description": "A royal mutton korma dish.",
+      "imageUrl": "https://picsum.photos/seed/menu6/600/400",
+      "imageHint": "mutton korma"
+    }
+  ]
 }
