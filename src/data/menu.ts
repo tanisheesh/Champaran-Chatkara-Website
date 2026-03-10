@@ -7,7 +7,9 @@ export const menuItems: MenuItem[] = [
     description: 'Slow-cooked mutton in a traditional clay pot with aromatic spices. A house specialty.',
     price: 450,
     category: 'Non-Veg',
+    menuCategory: 'Main Course',
     isSignature: true,
+    isBestSeller: true,
     image: 'sig_mutton_handi',
   },
   {
@@ -16,7 +18,9 @@ export const menuItems: MenuItem[] = [
     description: 'A traditional Bihari dish of whole wheat balls stuffed with sattu, served with roasted eggplant and potato mash.',
     price: 250,
     category: 'Veg',
+    menuCategory: 'Main Course',
     isSignature: true,
+    isBestSeller: true,
     image: 'sig_litti_chokha',
   },
   {
@@ -25,7 +29,9 @@ export const menuItems: MenuItem[] = [
     description: 'Chicken marinated in yogurt and spices, grilled to perfection in a tandoor.',
     price: 380,
     category: 'Non-Veg',
+    menuCategory: 'Starters',
     isSignature: true,
+    isBestSeller: false,
     image: 'sig_tandoori_chicken',
   },
   {
@@ -34,7 +40,9 @@ export const menuItems: MenuItem[] = [
     description: 'Cottage cheese cubes in a rich, creamy tomato and butter gravy.',
     price: 320,
     category: 'Veg',
+    menuCategory: 'Main Course',
     isSignature: false,
+    isBestSeller: true,
     image: 'veg_paneer_butter_masala',
   },
   {
@@ -43,7 +51,9 @@ export const menuItems: MenuItem[] = [
     description: 'Black lentils and kidney beans slow-cooked in a creamy, buttery sauce.',
     price: 280,
     category: 'Veg',
+    menuCategory: 'Main Course',
     isSignature: false,
+    isBestSeller: false,
     image: 'veg_dal_makhani',
   },
   {
@@ -52,7 +62,9 @@ export const menuItems: MenuItem[] = [
     description: 'Flatbread stuffed with a spiced roasted gram flour filling.',
     price: 150,
     category: 'Veg',
+    menuCategory: 'Breads',
     isSignature: false,
+    isBestSeller: false,
     image: 'veg_sattu_paratha',
   },
   {
@@ -61,7 +73,9 @@ export const menuItems: MenuItem[] = [
     description: 'Aromatic basmati rice cooked with chicken and a blend of exotic spices.',
     price: 350,
     category: 'Non-Veg',
+    menuCategory: 'Biryani & Rice',
     isSignature: false,
+    isBestSeller: true,
     image: 'nonveg_chicken_biryani',
   },
   {
@@ -70,7 +84,9 @@ export const menuItems: MenuItem[] = [
     description: 'Tangy and spicy fish curry made in traditional Bihari style with mustard paste.',
     price: 400,
     category: 'Non-Veg',
+    menuCategory: 'Main Course',
     isSignature: false,
+    isBestSeller: false,
     image: 'nonveg_fish_curry',
   },
   {
@@ -79,7 +95,9 @@ export const menuItems: MenuItem[] = [
     description: 'A rich and flavorful mutton curry cooked with yogurt, nuts, and spices.',
     price: 480,
     category: 'Non-Veg',
+    menuCategory: 'Main Course',
     isSignature: false,
+    isBestSeller: false,
     image: 'nonveg_mutton_korma',
   },
 ];
