@@ -38,7 +38,7 @@ Champaran Chatkara is a family-owned restaurant serving authentic Bihari dishes 
 
 **Contact**: +91 99391 83918
 
-**Email**: champaranchatka@gmail.com
+**Email**: champaranchatkara@gmail.com
 
 ## Specialties
 

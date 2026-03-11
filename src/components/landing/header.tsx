@@ -59,40 +59,37 @@ export function Header() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo/Brand */}
-          <div className="flex items-center">
+          {/* Logo/Brand - Hidden on desktop */}
+          <div className="flex items-center lg:hidden">
             <div 
               className="cursor-pointer opacity-0 absolute w-8 h-8"
               onDoubleClick={handleLogoDoubleClick}
               title="Double-click for admin access"
             />
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="text-xl sm:text-2xl font-bold font-headline text-white">
-                Champaran <span className="text-red-400">Chatkara</span>
-              </div>
-            </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            {navItems.map((item) => {
-              const isActive = item.href === '/' ? pathname === '/' : pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => handleNavClick(item.href, item.isExternal)}
-                  className={`relative transition-colors duration-300 font-medium text-base group ${
-                    isActive ? 'text-red-400' : 'text-white hover:text-red-400'
-                  }`}
-                >
-                  {item.label}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-red-500 transition-all duration-300 ${
-                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                  }`} />
-                </Link>
-              );
-            })}
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden lg:flex items-center justify-center flex-1">
+            <div className="flex items-center space-x-8">
+              {navItems.map((item) => {
+                const isActive = item.href === '/' ? pathname === '/' : pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => handleNavClick(item.href, item.isExternal)}
+                    className={`relative transition-colors duration-300 font-medium text-base group ${
+                      isActive ? 'text-red-400' : 'text-white hover:text-red-400'
+                    }`}
+                  >
+                    {item.label}
+                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-red-500 transition-all duration-300 ${
+                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`} />
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
 
           {/* Contact Info - Desktop */}

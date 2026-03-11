@@ -56,7 +56,7 @@ export function HeroSection() {
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         {/* Main heading */}
         <h1 
-          className={`transition-all duration-1000 delay-500 mb-12 pt-12 sm:pt-14 lg:pt-16 ${
+          className={`transition-all duration-1000 delay-500 mb-12 pt-24 sm:pt-28 lg:pt-32 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
@@ -68,20 +68,30 @@ export function HeroSection() {
           </span>
         </h1>
 
-        {/* Description */}
+        {/* Subtitle */}
         <p 
-          className={`text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto mb-16 leading-relaxed transition-all duration-1000 delay-700 ${
+          className={`text-lg sm:text-xl lg:text-2xl text-red-400 font-semibold mb-6 transition-all duration-1000 delay-600 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          Experience the <span className="text-red-400 font-semibold">authentic taste of Bihar</span>! 
-          Our traditional recipes bring you the flavors of Champaran streets, where every bite 
-          feels like <span className="text-red-400 font-semibold">home-cooked love</span>.
+          Authentic Bihari Flavours in Kaushambi
+        </p>
+
+        {/* Description */}
+        <p 
+          className={`text-base sm:text-lg lg:text-xl text-gray-300 max-w-5xl mx-auto mb-16 leading-relaxed transition-all duration-1000 delay-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          From crispy stuffed parathas to slow-cooked handi mutton, Champaran Chatkara brings together the 
+          <span className="text-red-400 font-semibold"> bold flavours of Bihar</span> with popular North Indian favourites. 
+          Every dish is cooked fresh using traditional spices and techniques, creating meals that feel satisfying and full of flavour. 
+          Perfect for <span className="text-red-400">family dinners, office lunches, and late-night cravings</span>.
         </p>
 
         {/* Stats */}
         <div 
-          className={`flex flex-wrap justify-center gap-12 sm:gap-16 transition-all duration-1000 delay-900 ${
+          className={`flex flex-wrap justify-center gap-12 sm:gap-16 pb-8 sm:pb-10 lg:pb-12 transition-all duration-1000 delay-900 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >

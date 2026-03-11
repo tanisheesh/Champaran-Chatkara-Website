@@ -18,6 +18,7 @@ export default function MenuPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
 
   useEffect(() => {
     // Show content with animation after component mounts
@@ -75,10 +76,21 @@ export default function MenuPage() {
   const activeCategories = menuCategories.filter(cat => cat.is_active).sort((a, b) => a.order - b.order);
   
   const filteredItems = menuItems.filter(item => {
-    const matchesCategory = !selectedCategory || item.menu_category === selectedCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.menu_category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+    // Universal search - search across all items regardless of category
+    const matchesSearch = !searchTerm || 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.menu_category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // Category filter - only apply if no search term
+    const matchesCategory = searchTerm || !selectedCategory || item.menu_category === selectedCategory;
+    
+    // Diet filter
+    const matchesDiet = dietFilter === 'all' || 
+      (dietFilter === 'veg' && item.category === 'Veg') ||
+      (dietFilter === 'non-veg' && item.category === 'Non-Veg');
+    
+    return matchesSearch && matchesCategory && matchesDiet;
   });
 
   const MenuItemRow = ({ item, index }: { item: MenuItem; index: number }) => {
@@ -189,23 +201,68 @@ export default function MenuPage() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            {/* Search */}
-            <div className="relative max-w-md mx-auto w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search dishes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-900/50 border-red-500/30 text-white placeholder-gray-400 focus:border-red-500 h-10 sm:h-11 transition-all duration-300"
-              />
+            {/* Search and Diet Toggle Row */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              {/* Search */}
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search dishes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-gray-900/50 border-red-500/30 text-white placeholder-gray-400 focus:border-red-500 h-10 sm:h-11 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Diet Filter Toggle */}
+              <div className="flex items-center bg-gray-900/50 border border-red-500/30 rounded-lg p-1">
+                <button
+                  onClick={() => setDietFilter('veg')}
+                  className={`px-3 py-2 rounded-md text-xs font-medium transition-all duration-300 ${
+                    dietFilter === 'veg' 
+                      ? 'bg-green-600 text-white' 
+                      : 'text-green-400 hover:bg-green-600/20'
+                  }`}
+                >
+                  <Vegan className="w-3 h-3 inline mr-1" />
+                  Veg
+                </button>
+                <button
+                  onClick={() => setDietFilter('all')}
+                  className={`px-3 py-2 rounded-md text-xs font-medium transition-all duration-300 ${
+                    dietFilter === 'all' 
+                      ? 'bg-red-600 text-white' 
+                      : 'text-gray-400 hover:bg-red-600/20'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setDietFilter('non-veg')}
+                  className={`px-3 py-2 rounded-md text-xs font-medium transition-all duration-300 ${
+                    dietFilter === 'non-veg' 
+                      ? 'bg-red-600 text-white' 
+                      : 'text-red-400 hover:bg-red-600/20'
+                  }`}
+                >
+                  <Beef className="w-3 h-3 inline mr-1" />
+                  Non-Veg
+                </button>
+              </div>
             </div>
             
-            {/* Category Filters - Scrollable */}
-            <div className="overflow-x-auto pb-2">
+            {/* Category Filters - Scrollable (thinner scrollbar) */}
+            <div className="overflow-x-auto pb-2 scrollbar-thin">
               <div className="flex gap-2 min-w-max px-2">
                 {activeCategories.map((category, index) => {
-                  const count = menuItems.filter(item => item.menu_category === category.name).length;
+                  const count = menuItems.filter(item => {
+                    const matchesDiet = dietFilter === 'all' || 
+                      (dietFilter === 'veg' && item.category === 'Veg') ||
+                      (dietFilter === 'non-veg' && item.category === 'Non-Veg');
+                    return item.menu_category === category.name && matchesDiet;
+                  }).length;
+                  
                   return (
                     <Button
                       key={category.id}
@@ -255,21 +312,27 @@ export default function MenuPage() {
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No dishes found</h3>
               <p className="text-gray-400 mb-6 text-sm sm:text-base px-4">
-                {searchTerm 
-                  ? `No results for "${searchTerm}"` 
-                  : `No items in ${selectedCategory} category.`}
+                {searchTerm ? (
+                  dietFilter === 'veg' ? `No vegetarian dishes found for "${searchTerm}"` :
+                  dietFilter === 'non-veg' ? `No non-vegetarian dishes found for "${searchTerm}"` :
+                  `No results for "${searchTerm}"`
+                ) : (
+                  dietFilter === 'veg' ? 'No vegetarian dishes available in this category.' :
+                  dietFilter === 'non-veg' ? 'No non-vegetarian dishes available in this category.' :
+                  selectedCategory ? `No items in ${selectedCategory} category with current filters.` :
+                  'No items match your current filters.'
+                )}
               </p>
               <Button 
                 variant="outline" 
                 onClick={() => {
                   setSearchTerm('');
-                  if (activeCategories.length > 0) {
-                    setSelectedCategory(activeCategories[0].name);
-                  }
+                  setSelectedCategory('');
+                  setDietFilter('all');
                 }}
                 className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 hover:scale-105"
               >
-                Clear Search
+                Clear All Filters
               </Button>
             </div>
           )}

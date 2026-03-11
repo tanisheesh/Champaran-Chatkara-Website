@@ -29,32 +29,31 @@ export function AboutSection() {
   const features = [
     {
       icon: Heart,
-      title: 'Made with Love',
-      description: 'Every dish is prepared with traditional techniques and generations of love.',
+      title: 'Traditional Flavours',
+      description: 'Our dishes are prepared using classic spice combinations that bring out authentic taste.',
     },
     {
       icon: Award,
-      title: 'Authentic Recipes',
-      description: 'Original dishes from the heart of Bihar, maintaining authentic Champaran flavors.',
+      title: 'Freshly Cooked Food',
+      description: 'Every order is prepared fresh in the kitchen to maintain quality and flavour.',
     },
     {
       icon: Users,
-      title: 'Family Heritage',
-      description: 'A family business serving authentic Bihari cuisine for over 25 years.',
+      title: 'Wide Variety',
+      description: 'From parathas and thalis to tandoori dishes, rolls, and Chinese favourites, the menu offers something for everyone.',
     },
     {
       icon: Clock,
-      title: 'Time-Honored Process',
-      description: 'We slow-cook our dishes to perfection, ensuring every bite is flavorful.',
+      title: 'Family-Friendly Dining',
+      description: 'A comfortable place where families, office groups, and friends can enjoy a satisfying meal together.',
     },
   ];
 
   return (
-    <section id="about" className="py-8 sm:py-12 md:py-16 lg:py-24 bg-gradient-to-b from-black to-gray-900 relative">
+    <section id="about" className="py-4 sm:py-6 md:py-8 lg:py-12 bg-gradient-to-b from-black to-gray-900 relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <span className="text-red-400 text-base sm:text-lg lg:text-xl mb-3 sm:mb-4 block">Our Journey</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-headline text-white mb-4 sm:mb-6">
             <span className="cinematic-text">Tradition</span> & Story
           </h2>
@@ -67,31 +66,22 @@ export function AboutSection() {
           <div className="order-2 lg:order-1">
             <div className="space-y-3 sm:space-y-4 lg:space-y-6 text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed">
               <p>
-                In the heart of <span className="text-red-400 font-semibold">Champaran, Bihar</span>, 
-                our culinary journey began 25 years ago. What started as a small family kitchen 
-                has now become a beloved destination for authentic Bihari cuisine.
+                <span className="text-red-400 font-semibold">Champaran Chatkara</span> started with a simple idea: 
+                serve food that people genuinely enjoy and want to come back for. Inspired by the cooking traditions of 
+                <span className="text-red-400 font-semibold"> Bihar</span>, our kitchen focuses on bold spices, slow cooking, 
+                and recipes that bring out deep, comforting flavours.
               </p>
               
               <p>
-                Our founder <span className="text-red-400 font-semibold">Master Chef</span> learned 
-                these recipes from his grandmother, who believed that food is not just about filling 
-                the stomach, but about warming the heart. Every dish tells a story of our rich cultural heritage.
-              </p>
-              
-              <p>
-                From the smoky flavors of our signature <span className="text-red-400 font-semibold">Litti Chokha</span> to 
-                the slow-cooked <span className="text-red-400 font-semibold">Champaran Mutton</span>, 
-                we preserve the authentic taste that has been cherished for generations.
+                Over time, the menu has expanded to include <span className="text-red-400 font-semibold">North Indian classics, 
+                tandoor dishes, rolls, Chinese favourites, and hearty thalis</span> — making it a place where everyone 
+                at the table finds something they enjoy.
               </p>
 
-              <div className="pt-3 sm:pt-4 lg:pt-6">
-                <blockquote className="border-l-4 border-red-500 pl-3 sm:pl-4 lg:pl-6 italic text-sm sm:text-base lg:text-lg xl:text-xl text-red-300">
-                  "Food is not just about taste, it's about memories, culture, and love."
-                  <footer className="text-gray-400 text-xs sm:text-sm lg:text-base mt-1 sm:mt-2 not-italic">
-                    - Our Founder
-                  </footer>
-                </blockquote>
-              </div>
+              <p>
+                From morning parathas to late evening dinners, our goal remains the same: 
+                <span className="text-red-400 font-semibold"> good food, generous portions, and a welcoming place to share a meal</span>.
+              </p>
             </div>
           </div>
 
@@ -128,20 +118,27 @@ export function AboutSection() {
         </div>
 
         {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-16">
-          {features.map((feature, index) => (
-            <div key={index} className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-10 sm:w-12 lg:w-16 h-10 sm:h-12 lg:h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-red-500/20 transition-colors duration-300">
-                <feature.icon className="h-5 sm:h-6 lg:h-8 w-5 sm:w-6 lg:w-8 text-red-500" />
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold font-headline text-white mb-3 sm:mb-4">
+              What Makes Us <span className="text-red-400">Special</span>
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-10 sm:w-12 lg:w-16 h-10 sm:h-12 lg:h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-red-500/20 transition-colors duration-300">
+                  <feature.icon className="h-5 sm:h-6 lg:h-8 w-5 sm:w-6 lg:w-8 text-red-500" />
+                </div>
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold font-headline text-white mb-2 sm:mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-400 leading-relaxed text-xs sm:text-sm lg:text-base">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold font-headline text-white mb-2 sm:mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-400 leading-relaxed text-xs sm:text-sm lg:text-base">
-                {feature.description}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Food showcase section */}
@@ -252,18 +249,15 @@ export function AboutSection() {
             </h3>
             <div className="space-y-2 sm:space-y-3 lg:space-y-4 text-gray-300 leading-relaxed text-xs sm:text-sm lg:text-base">
               <p>
-                Every dish contains the <span className="text-red-400 font-semibold">taste of home cooking</span>. 
-                Our chefs use traditional techniques, preparing each dish on clay stoves with slow fire 
-                to ensure perfect flavor.
+                At <span className="text-red-400 font-semibold">Champaran Chatkara</span>, every dish is prepared using 
+                traditional spices and cooking methods that bring out rich, satisfying flavour. From crispy stuffed parathas 
+                to slow-cooked handi preparations, our menu combines <span className="text-red-400 font-semibold">bold Bihari-style cooking</span> with 
+                popular North Indian favourites.
               </p>
               <p>
-                From <span className="text-red-400 font-semibold">Litti Chokha</span> to 
-                <span className="text-red-400 font-semibold"> Champaran Mutton</span>, every dish carries 
-                the essence of Bihar's soil and the magic of traditional spices.
-              </p>
-              <p>
-                Come, taste the <span className="text-red-400 font-semibold">authentic Bihari flavors</span> 
-                and feel the warmth of home.
+                Our signature <span className="text-red-400 font-semibold">Handi Chicken, Handi Mutton, and freshly prepared parathas</span> are 
+                cooked with care to deliver deep flavour in every bite. Come and enjoy <span className="text-red-400 font-semibold">hearty meals that are fresh, flavourful, and perfect for sharing</span> with 
+                family and friends.
               </p>
             </div>
           </div>

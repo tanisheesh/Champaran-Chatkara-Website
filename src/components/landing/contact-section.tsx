@@ -43,14 +43,9 @@ export function ContactSection() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            <span className="text-red-400 text-base sm:text-lg lg:text-xl mb-3 sm:mb-4 block">Get In Touch</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-headline text-white mb-4 sm:mb-6">
-              Visit <span className="cinematic-text">Us Today</span>
+              Visit <span className="cinematic-text">Us</span>
             </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed px-4">
-              Experience authentic Bihari cuisine in the heart of Kaushambi, Ghaziabad. 
-              We're here to serve you the best traditional flavors.
-            </p>
             <div className="w-16 sm:w-20 lg:w-24 h-0.5 sm:h-1 bg-red-500 mx-auto mt-4 sm:mt-6 lg:mt-8" />
           </div>
         </div>
@@ -91,9 +86,11 @@ export function ContactSection() {
                   Special Note
                 </h4>
                 <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                  We recommend calling ahead during peak hours (7-9 PM) to ensure 
-                  your table is ready. Our signature dishes like Litti Chokha and 
-                  Champaran Mutton are prepared fresh and may take 20-30 minutes.
+                  During peak hours (7 PM – 9 PM), we recommend calling ahead to confirm table availability.
+                </p>
+                <p className="text-gray-300 leading-relaxed text-sm sm:text-base mt-2">
+                  Some dishes, especially handi preparations, are cooked fresh and may take a little extra time — 
+                  but the flavour is worth the wait.
                 </p>
               </div>
 
@@ -253,9 +250,11 @@ export function ContactSection() {
                 Special Note
               </h4>
               <p className="text-gray-300 leading-relaxed text-xs sm:text-sm">
-                We recommend calling ahead during peak hours (7-9 PM) to ensure 
-                your table is ready. Our signature dishes like Litti Chokha and 
-                Champaran Mutton are prepared fresh and may take 20-30 minutes.
+                During peak hours (7 PM – 9 PM), we recommend calling ahead to confirm table availability.
+              </p>
+              <p className="text-gray-300 leading-relaxed text-xs sm:text-sm mt-2">
+                Some dishes, especially handi preparations, are cooked fresh and may take a little extra time — 
+                but the flavour is worth the wait.
               </p>
             </div>
           </div>
