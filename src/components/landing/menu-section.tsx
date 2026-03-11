@@ -19,8 +19,14 @@ export function MenuSection() {
           getAllMenuItems(),
           getAllMenuCategories()
         ]);
+        
+        // Remove any potential duplicates on the client side
+        const uniqueCategories = categories.filter((category, index, self) => 
+          index === self.findIndex(c => c.name === category.name)
+        );
+        
         setMenuItems(items);
-        setMenuCategories(categories);
+        setMenuCategories(uniqueCategories);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -47,6 +53,13 @@ export function MenuSection() {
 
   // Simple Menu Item (List format - no image, no description)
   const MenuItemRow = ({ item, index }: { item: any; index: number }) => {
+    // Build price options from new structure
+    const priceOptions = [];
+    if (item.qtr_price) priceOptions.push({ label: 'Quarter', price: item.qtr_price });
+    if (item.half_price) priceOptions.push({ label: 'Half', price: item.half_price });
+    if (item.full_price) priceOptions.push({ label: 'Full', price: item.full_price });
+    if (item.single_price) priceOptions.push({ label: 'Single', price: item.single_price });
+
     return (
       <div 
         className="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-red-500/10 last:border-b-0 hover:bg-red-500/5 transition-colors duration-300 rounded-lg px-4 animate-slideInLeft gap-4 sm:gap-0"
@@ -69,11 +82,11 @@ export function MenuSection() {
           </div>
         </div>
         <div className="text-left sm:text-right">
-          {item.pricing && item.pricing.length > 0 ? (
+          {priceOptions.length > 0 ? (
             <div className="space-y-1">
-              {item.pricing.map((price: any, priceIndex: number) => (
+              {priceOptions.map((price, priceIndex) => (
                 <div key={priceIndex} className="flex flex-row sm:flex-row items-center justify-between sm:justify-end gap-3">
-                  <span className="text-sm text-gray-400 min-w-[60px]">{price.quantity}</span>
+                  <span className="text-sm text-gray-400 min-w-[60px]">{price.label}</span>
                   <span className="font-bold text-red-400 text-base sm:text-lg">₹{price.price}</span>
                 </div>
               ))}

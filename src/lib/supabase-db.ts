@@ -1,37 +1,70 @@
 import { supabase } from './supabase';
-import type { MenuItem, MenuCategory, MenuItemPricing } from './types';
+import type { MenuItem, MenuCategory, PriceOption } from './types';
 
-// Menu Items Functions
+// Helper function to get price options for display
+export function getPriceOptions(item: MenuItem): PriceOption[] {
+  const options: PriceOption[] = [];
+  
+  if (item.qtr_price) options.push({ label: 'Quarter', price: item.qtr_price });
+  if (item.half_price) options.push({ label: 'Half', price: item.half_price });
+  if (item.full_price) options.push({ label: 'Full', price: item.full_price });
+  if (item.single_price) options.push({ label: 'Single', price: item.single_price });
+  
+  return options;
+}
+
+// Helper function to get minimum price for sorting/display
+export function getMinPrice(item: MenuItem): number {
+  const prices = [item.qtr_price, item.half_price, item.full_price, item.single_price]
+    .filter(price => price !== null && price !== undefined) as number[];
+  
+  return prices.length > 0 ? Math.min(...prices) : 0;
+}
+
+// Menu Items Functions with proper error handling and retry logic
 export async function getAllMenuItems(): Promise<MenuItem[]> {
-  try {
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select(`
-        *,
-        pricing:menu_item_pricing(*)
-      `)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching menu items:', error);
-    return [];
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase
+        .from('menu_items')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error(`Attempt ${attempts + 1} - Error fetching menu items:`, error);
+        if (attempts === maxAttempts - 1) throw error;
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        continue;
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+      if (attempts === maxAttempts - 1) return [];
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+    }
   }
+  
+  return [];
 }
 
 export async function getMenuItemById(id: string): Promise<MenuItem | null> {
   try {
     const { data, error } = await supabase
       .from('menu_items')
-      .select(`
-        *,
-        pricing:menu_item_pricing(*)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching menu item:', error);
+      return null;
+    }
     return data;
   } catch (error) {
     console.error('Error fetching menu item:', error);
@@ -40,77 +73,90 @@ export async function getMenuItemById(id: string): Promise<MenuItem | null> {
 }
 
 export async function addMenuItem(menuItem: Omit<MenuItem, 'id'>): Promise<string | null> {
-  try {
-    const { pricing, ...itemData } = menuItem;
-    
-    // Insert menu item
-    const { data, error } = await supabase
-      .from('menu_items')
-      .insert([itemData])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    
-    // Insert pricing data
-    if (pricing && pricing.length > 0) {
-      const pricingData = pricing.map(p => ({
-        menu_item_id: data.id,
-        quantity: p.quantity,
-        price: p.price
-      }));
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase
+        .from('menu_items')
+        .insert([menuItem])
+        .select()
+        .single();
       
-      const { error: pricingError } = await supabase
-        .from('menu_item_pricing')
-        .insert(pricingData);
+      if (error) {
+        console.error(`Attempt ${attempts + 1} - Error adding menu item:`, error);
+        if (attempts === maxAttempts - 1) throw error;
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        continue;
+      }
       
-      if (pricingError) throw pricingError;
+      return data?.id || null;
+    } catch (error) {
+      console.error('Error adding menu item:', error);
+      if (attempts === maxAttempts - 1) return null;
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
     }
-    
-    return data?.id || null;
-  } catch (error) {
-    console.error('Error adding menu item:', error);
-    return null;
   }
+  
+  return null;
 }
 
 export async function updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<boolean> {
   try {
-    const { pricing, ...itemData } = menuItem;
+    console.log('updateMenuItem called with:', { id, menuItem });
     
-    // Update menu item
-    const { error } = await supabase
+    // First check if the item exists
+    const { data: existingItem, error: fetchError } = await supabase
       .from('menu_items')
-      .update({ ...itemData, updated_at: new Date().toISOString() })
-      .eq('id', id);
+      .select('*')
+      .eq('id', id)
+      .single();
     
-    if (error) throw error;
+    if (fetchError) {
+      console.error('Error fetching existing item:', fetchError);
+      return false;
+    }
     
-    // Update pricing data if provided
-    if (pricing) {
-      // Delete existing pricing
-      await supabase
-        .from('menu_item_pricing')
-        .delete()
-        .eq('menu_item_id', id);
-      
-      // Insert new pricing
-      if (pricing.length > 0) {
-        const pricingData = pricing.map(p => ({
-          menu_item_id: id,
-          quantity: p.quantity,
-          price: p.price
-        }));
+    if (!existingItem) {
+      console.error('Item not found with ID:', id);
+      return false;
+    }
+    
+    console.log('Existing item found:', existingItem);
+    
+    // Try update with retry logic
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const { error } = await supabase
+          .from('menu_items')
+          .update({ ...menuItem, updated_at: new Date().toISOString() })
+          .eq('id', id);
         
-        const { error: pricingError } = await supabase
-          .from('menu_item_pricing')
-          .insert(pricingData);
+        if (error) {
+          console.error(`Attempt ${attempts + 1} - Supabase update error:`, error);
+          if (attempts === maxAttempts - 1) throw error;
+          attempts++;
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+          continue;
+        }
         
-        if (pricingError) throw pricingError;
+        console.log('Update completed successfully');
+        return true;
+      } catch (retryError) {
+        console.error(`Attempt ${attempts + 1} failed:`, retryError);
+        if (attempts === maxAttempts - 1) return false;
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
       }
     }
     
-    return true;
+    return false;
   } catch (error) {
     console.error('Error updating menu item:', error);
     return false;
@@ -124,7 +170,10 @@ export async function deleteMenuItem(id: string): Promise<boolean> {
       .delete()
       .eq('id', id);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting menu item:', error);
+      return false;
+    }
     return true;
   } catch (error) {
     console.error('Error deleting menu item:', error);
@@ -132,20 +181,63 @@ export async function deleteMenuItem(id: string): Promise<boolean> {
   }
 }
 
-// Menu Categories Functions
-export async function getAllMenuCategories(): Promise<MenuCategory[]> {
-  try {
-    const { data, error } = await supabase
-      .from('menu_categories')
-      .select('*')
-      .order('order', { ascending: true });
-    
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching menu categories:', error);
-    return [];
+// Menu Categories Functions with caching and deduplication
+let categoriesCache: { data: MenuCategory[]; timestamp: number } | null = null;
+const CATEGORIES_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+
+// Function to clear categories cache (can be called externally)
+export function clearCategoriesCache() {
+  categoriesCache = null;
+}
+
+export async function getAllMenuCategories(forceRefresh = false): Promise<MenuCategory[]> {
+  // Check cache first (unless force refresh is requested)
+  if (!forceRefresh && categoriesCache && Date.now() - categoriesCache.timestamp < CATEGORIES_CACHE_DURATION) {
+    return categoriesCache.data;
   }
+  
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase
+        .from('menu_categories')
+        .select('*')
+        .order('order', { ascending: true });
+      
+      if (error) {
+        console.error(`Attempt ${attempts + 1} - Error fetching menu categories:`, error);
+        if (attempts === maxAttempts - 1) throw error;
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        continue;
+      }
+      
+      const categories = data || [];
+      
+      // Deduplicate categories by name (keep the first occurrence)
+      const uniqueCategories = categories.reduce((acc: MenuCategory[], current) => {
+        const exists = acc.find(cat => cat.name === current.name);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+      
+      // Update cache
+      categoriesCache = { data: uniqueCategories, timestamp: Date.now() };
+      
+      return uniqueCategories;
+    } catch (error) {
+      console.error('Error fetching menu categories:', error);
+      if (attempts === maxAttempts - 1) return [];
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+    }
+  }
+  
+  return [];
 }
 
 export async function addMenuCategory(category: Omit<MenuCategory, 'id'>): Promise<string | null> {
@@ -156,7 +248,12 @@ export async function addMenuCategory(category: Omit<MenuCategory, 'id'>): Promi
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error adding menu category:', error);
+      return null;
+    }
+    
+    clearCategoriesCache();
     return data?.id || null;
   } catch (error) {
     console.error('Error adding menu category:', error);
@@ -166,12 +263,46 @@ export async function addMenuCategory(category: Omit<MenuCategory, 'id'>): Promi
 
 export async function updateMenuCategory(id: string, category: Partial<MenuCategory>): Promise<boolean> {
   try {
+    // If we're updating the category name, we need to update menu items first
+    if (category.name) {
+      // Get the current category to find the old name
+      const { data: currentCategory, error: fetchError } = await supabase
+        .from('menu_categories')
+        .select('name')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        console.error('Error fetching current category:', fetchError);
+        return false;
+      }
+      
+      // Update all menu items that reference this category
+      if (currentCategory && currentCategory.name !== category.name) {
+        const { error: updateItemsError } = await supabase
+          .from('menu_items')
+          .update({ menu_category: category.name })
+          .eq('menu_category', currentCategory.name);
+        
+        if (updateItemsError) {
+          console.error('Error updating menu items category references:', updateItemsError);
+          return false;
+        }
+      }
+    }
+    
+    // Now update the category
     const { error } = await supabase
       .from('menu_categories')
       .update({ ...category, updated_at: new Date().toISOString() })
       .eq('id', id);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating menu category:', error);
+      return false;
+    }
+    
+    clearCategoriesCache();
     return true;
   } catch (error) {
     console.error('Error updating menu category:', error);
@@ -179,54 +310,119 @@ export async function updateMenuCategory(id: string, category: Partial<MenuCateg
   }
 }
 
-export async function deleteMenuCategory(id: string): Promise<boolean> {
+export async function deleteMenuCategory(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    // First check if there are any menu items using this category
+    const { data: categoryData, error: fetchError } = await supabase
+      .from('menu_categories')
+      .select('name')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError) {
+      console.error('Error fetching category for deletion:', fetchError);
+      return { success: false, error: 'Category not found' };
+    }
+    
+    if (categoryData) {
+      const { data: menuItems, error: itemsError } = await supabase
+        .from('menu_items')
+        .select('id')
+        .eq('menu_category', categoryData.name);
+      
+      if (itemsError) {
+        console.error('Error checking menu items for category:', itemsError);
+        return { success: false, error: 'Failed to check category usage' };
+      }
+      
+      if (menuItems && menuItems.length > 0) {
+        return {
+          success: false,
+          error: `Cannot delete category "${categoryData.name}" because it has ${menuItems.length} menu item(s) using it. Please move or delete those items first.`
+        };
+      }
+    }
+    
+    // If no items are using this category, safe to delete
     const { error } = await supabase
       .from('menu_categories')
       .delete()
       .eq('id', id);
     
-    if (error) throw error;
-    return true;
+    if (error) {
+      console.error('Error deleting category:', error);
+      return { success: false, error: 'Failed to delete category' };
+    }
+    
+    clearCategoriesCache();
+    return { success: true };
   } catch (error) {
     console.error('Error deleting menu category:', error);
-    return false;
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to delete category'
+    };
   }
 }
 
-// Best Sellers
+// Best Sellers with caching
+let bestSellersCache: { data: MenuItem[]; timestamp: number } | null = null;
+
 export async function getBestSellers(): Promise<MenuItem[]> {
+  // Check cache first
+  if (bestSellersCache && Date.now() - bestSellersCache.timestamp < CATEGORIES_CACHE_DURATION) {
+    return bestSellersCache.data;
+  }
+  
   try {
     const { data, error } = await supabase
       .from('menu_items')
-      .select(`
-        *,
-        pricing:menu_item_pricing(*)
-      `)
+      .select('*')
       .eq('is_best_seller', true)
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
-    return data || [];
+    if (error) {
+      console.error('Error fetching best sellers:', error);
+      return [];
+    }
+    
+    const bestSellers = data || [];
+    bestSellersCache = { data: bestSellers, timestamp: Date.now() };
+    
+    return bestSellers;
   } catch (error) {
     console.error('Error fetching best sellers:', error);
     return [];
   }
 }
 
-// Items by Category
-export async function getMenuItemsByCategory(categoryName: string): Promise<MenuItem[]> {
+// Items by Category with pagination support
+export async function getMenuItemsByCategory(
+  categoryName: string, 
+  limit?: number, 
+  offset?: number
+): Promise<MenuItem[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('menu_items')
-      .select(`
-        *,
-        pricing:menu_item_pricing(*)
-      `)
+      .select('*')
       .eq('menu_category', categoryName)
-      .order('created_at', { ascending: false });
+      .order('name', { ascending: true });
     
-    if (error) throw error;
+    if (limit) {
+      query = query.limit(limit);
+    }
+    
+    if (offset) {
+      query = query.range(offset, offset + (limit || 50) - 1);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching items by category:', error);
+      return [];
+    }
     return data || [];
   } catch (error) {
     console.error('Error fetching items by category:', error);
@@ -234,23 +430,71 @@ export async function getMenuItemsByCategory(categoryName: string): Promise<Menu
   }
 }
 
-// Items for About Section
-export async function getAboutSectionItems(): Promise<MenuItem[]> {
+// Bulk insert for CSV import with transaction-like behavior
+export async function bulkInsertMenuItems(items: Omit<MenuItem, 'id'>[]): Promise<boolean> {
   try {
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select(`
-        *,
-        pricing:menu_item_pricing(*)
-      `)
-      .eq('show_in_about', true)
-      .order('created_at', { ascending: false })
-      .limit(4); // Maximum 4 items for about section
+    // Insert in batches to avoid timeout
+    const batchSize = 100;
+    const batches = [];
     
-    if (error) throw error;
-    return data || [];
+    for (let i = 0; i < items.length; i += batchSize) {
+      batches.push(items.slice(i, i + batchSize));
+    }
+    
+    for (const batch of batches) {
+      const { error } = await supabase
+        .from('menu_items')
+        .insert(batch);
+      
+      if (error) {
+        console.error('Error in bulk insert batch:', error);
+        return false;
+      }
+    }
+    
+    // Clear caches after bulk insert
+    clearCategoriesCache();
+    bestSellersCache = null;
+    
+    return true;
   } catch (error) {
-    console.error('Error fetching about section items:', error);
-    return [];
+    console.error('Error bulk inserting menu items:', error);
+    return false;
+  }
+}
+
+// Clear all menu data (for fresh import) with proper error handling
+export async function clearAllMenuData(): Promise<boolean> {
+  try {
+    // Delete items first (due to foreign key constraint)
+    const { error: itemsError } = await supabase
+      .from('menu_items')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (itemsError) {
+      console.error('Error clearing menu items:', itemsError);
+      return false;
+    }
+    
+    // Delete categories
+    const { error: categoriesError } = await supabase
+      .from('menu_categories')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (categoriesError) {
+      console.error('Error clearing menu categories:', categoriesError);
+      return false;
+    }
+    
+    // Clear all caches
+    clearCategoriesCache();
+    bestSellersCache = null;
+    
+    return true;
+  } catch (error) {
+    console.error('Error clearing menu data:', error);
+    return false;
   }
 }

@@ -3,7 +3,6 @@
 import { Header } from "@/components/landing/header";
 import { HeroSection } from "@/components/landing/hero-section";
 import { AboutSection } from "@/components/landing/about-section";
-import { MenuSection } from "@/components/landing/menu-section";
 import { ContactSection } from "@/components/landing/contact-section";
 import { Footer } from "@/components/landing/footer";
 import { useEffect, useState } from 'react';
@@ -34,7 +33,6 @@ export default function Home() {
       <main className="flex-grow">
         <HeroSection />
         <AboutSection />
-        <MenuSection />
         <ContactSection />
       </main>
       <Footer />

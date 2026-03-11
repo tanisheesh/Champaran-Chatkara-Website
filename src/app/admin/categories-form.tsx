@@ -47,7 +47,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-import { getAllMenuCategories, getAllMenuItems, addMenuCategory, updateMenuCategory, deleteMenuCategory } from '@/lib/supabase-db';
+import { getAllMenuCategories, getAllMenuItems, clearCategoriesCache } from '@/lib/supabase-db';
+import { addMenuCategoryAction, updateMenuCategoryAction, deleteMenuCategoryAction } from './category-actions';
 import type { MenuCategory } from '@/lib/types';
 
 const categorySchema = z.object({
@@ -98,11 +99,18 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
   const loadCategories = async () => {
     try {
       setLoading(true);
+      // Force fresh data by adding timestamp to bypass any caching
       const [categoriesData, itemsData] = await Promise.all([
         getAllMenuCategories(),
         getAllMenuItems()
       ]);
-      setCategories(categoriesData);
+      
+      // Remove any potential duplicates on the client side as well
+      const uniqueCategories = categoriesData.filter((category, index, self) => 
+        index === self.findIndex(c => c.name === category.name)
+      );
+      
+      setCategories(uniqueCategories);
       setMenuItems(itemsData);
     } catch (error) {
       console.error('Error loading categories:', error);
@@ -118,6 +126,20 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const onSubmit = async (data: CategoryFormValues) => {
     try {
+      // Check if category name already exists (for new categories or when changing name)
+      const nameExists = categories.some(cat => 
+        cat.name.toLowerCase() === data.name.toLowerCase() && cat.id !== editingCategory?.id
+      );
+      
+      if (nameExists) {
+        toast({
+          variant: 'destructive',
+          title: 'Category name already exists',
+          description: `A category with the name "${data.name}" already exists.`,
+        });
+        return;
+      }
+      
       // Check if order already exists (for new categories or when changing order)
       const orderExists = categories.some(cat => 
         cat.order === data.order && cat.id !== editingCategory?.id
@@ -134,13 +156,13 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
 
       if (editingCategory) {
         // Update existing category
-        const success = await updateMenuCategory(editingCategory.id, {
+        const result = await updateMenuCategoryAction(editingCategory.id, {
           ...data,
           updated_at: new Date().toISOString(),
         });
         
-        if (!success) {
-          throw new Error('Failed to update category');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to update category');
         }
         
         toast({
@@ -149,13 +171,13 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
         });
       } else {
         // Add new category
-        const newId = await addMenuCategory({
+        const result = await addMenuCategoryAction({
           ...data,
           is_active: true,
         });
         
-        if (!newId) {
-          throw new Error('Failed to add category');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to add category');
         }
         
         toast({
@@ -167,7 +189,10 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
       setDialogOpen(false);
       setEditingCategory(null);
       form.reset();
-      loadCategories();
+      
+      // Clear cache and force refresh
+      clearCategoriesCache();
+      await loadCategories();
       onSuccess?.();
       
     } catch (error) {
@@ -191,10 +216,15 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const handleDelete = async (categoryId: string, categoryName: string) => {
     try {
-      const success = await deleteMenuCategory(categoryId);
+      const result = await deleteMenuCategoryAction(categoryId);
       
-      if (!success) {
-        throw new Error('Failed to delete category');
+      if (!result.success) {
+        toast({
+          variant: 'destructive',
+          title: 'Cannot delete category',
+          description: result.error || 'Failed to delete category',
+        });
+        return;
       }
       
       toast({
@@ -202,14 +232,16 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
         description: `"${categoryName}" has been deleted permanently.`,
       });
       
-      loadCategories();
+      // Clear cache and force refresh
+      clearCategoriesCache();
+      await loadCategories();
       onSuccess?.();
       
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to delete category. Make sure no menu items are using this category.',
+        description: 'An unexpected error occurred while deleting the category.',
       });
     }
   };
@@ -311,7 +343,7 @@ export function CategoriesForm({ onSuccess }: { onSuccess?: () => void }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
-          <Card key={category.id}>
+          <Card key={`category-${category.id}-${category.name}`}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-base">
                 {category.name}

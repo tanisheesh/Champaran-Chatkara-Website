@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { UtensilsCrossed, Eye, EyeOff } from 'lucide-react';
+import { UtensilsCrossed, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,8 +63,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <UtensilsCrossed className="h-12 w-12 text-primary" />
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
             Sign in to access the Champaran Chatkara admin dashboard
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="autofill-fix">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -86,7 +86,8 @@ export default function AdminLoginPage() {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="admin@champaran-chatkara.com"
+                        placeholder="Enter email"
+                        className="bg-input border-border focus:ring-ring"
                         {...field}
                       />
                     </FormControl>
@@ -105,7 +106,8 @@ export default function AdminLoginPage() {
                       <div className="relative">
                         <Input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="Enter your password"
+                          placeholder="Enter password"
+                          className="bg-input border-border focus:ring-ring pr-10"
                           {...field}
                         />
                         <Button
@@ -131,6 +133,18 @@ export default function AdminLoginPage() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
+              
+              <div className="pt-2">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => router.push('/')}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Home Page
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>

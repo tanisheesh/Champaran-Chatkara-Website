@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed:menu": "node seed-menu-data.js"
+    "seed:menu": "node seed-menu-data.js",
+    "seed:simple": "node seed-simplified-menu.js"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.29.0",

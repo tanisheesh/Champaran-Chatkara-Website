@@ -8,7 +8,7 @@ export interface AdminUser {
   displayName?: string;
 }
 
-// Sign in admin
+// Simple admin verification without timeout bullshit
 export async function signInAdmin(email: string, password: string): Promise<AdminUser | null> {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -16,90 +16,74 @@ export async function signInAdmin(email: string, password: string): Promise<Admi
       password,
     });
 
-    if (error) throw error;
-
-    if (data.user) {
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admins')
-        .select('*')
-        .eq('user_id', data.user.id)
-        .single();
-
-      if (adminError || !adminData) {
-        await supabase.auth.signOut();
-        throw new Error('Unauthorized: Not an admin user');
-      }
-
-      return {
-        id: data.user.id,
-        email: data.user.email!,
-        role: 'admin',
-        displayName: data.user.user_metadata?.display_name,
-      };
+    if (error) {
+      throw new Error(error.message);
     }
 
-    return null;
+    if (!data.user) {
+      throw new Error('No user data returned');
+    }
+
+    // Check if user is admin - simple query, no timeout
+    const { data: adminData } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .single();
+
+    if (!adminData) {
+      await supabase.auth.signOut();
+      throw new Error('Unauthorized: Not an admin user');
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email!,
+      role: 'admin',
+      displayName: data.user.user_metadata?.display_name || data.user.email?.split('@')[0],
+    };
   } catch (error) {
     console.error('Error signing in admin:', error);
     throw error;
   }
 }
 
-// Sign out
+// Simple sign out
 export async function signOutAdmin(): Promise<void> {
-  try {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error signing out:', error);
-    throw error;
-  }
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 }
 
-// Check if current user is admin
-export async function isCurrentUserAdmin(): Promise<boolean> {
+// Simple current user check
+export async function getCurrentUser(): Promise<User | null> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-
-    const { data: adminData, error } = await supabase
-      .from('admins')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    return !error && !!adminData;
+    return user;
   } catch (error) {
-    console.error('Error checking admin status:', error);
-    return false;
+    console.error('Error getting current user:', error);
+    return null;
   }
 }
 
-// Auth state listener
+// Simple auth state listener - no timeout, no cache, no bullshit
 export function onAuthStateChange(callback: (user: AdminUser | null) => void) {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
     if (session?.user) {
-      try {
-        // Check if user is admin
-        const { data: adminData, error } = await supabase
-          .from('admins')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
+      // Simple admin check
+      const { data: adminData } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
 
-        if (!error && adminData) {
-          callback({
-            id: session.user.id,
-            email: session.user.email!,
-            role: 'admin',
-            displayName: session.user.user_metadata?.display_name,
-          });
-        } else {
-          callback(null);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
+      if (adminData) {
+        callback({
+          id: session.user.id,
+          email: session.user.email!,
+          role: 'admin',
+          displayName: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+        });
+      } else {
         callback(null);
       }
     } else {
@@ -107,5 +91,7 @@ export function onAuthStateChange(callback: (user: AdminUser | null) => void) {
     }
   });
 
-  return () => subscription.unsubscribe();
+  return () => {
+    subscription.unsubscribe();
+  };
 }

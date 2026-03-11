@@ -84,6 +84,15 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      transformStyle: {
+        'preserve-3d': 'preserve-3d',
+      },
+      perspective: {
+        '1000': '1000px',
+      },
+      rotate: {
+        'y-180': 'rotateY(180deg)',
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],
